@@ -1,5 +1,8 @@
 ---
 title: "MATH 244: Intermediate Data Science Project"
+project:
+  type: website
+  output-dir: docs
 ---
 
 Welcome! This is a template for creating a website using quarto and GitHub pages.
