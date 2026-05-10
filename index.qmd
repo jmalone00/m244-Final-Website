@@ -5,8 +5,22 @@ project:
   output-dir: docs
 ---
 
-Welcome! This is a template for creating a website using quarto and GitHub pages.
+### MVP Project
 
-![](hedgehog.png){fig-align="center" width="603"}
+## Introduction
 
-[Artwork by \@allison_horst](https://twitter.com/allison_horst)
+Explain the project and variables
+
+## Methodology
+
+Explain what we did
+
+## Results
+
+Show graphs and the other analyses we did
+
+## Discussion
+
+Talk about our takeaways from the project
+
+
