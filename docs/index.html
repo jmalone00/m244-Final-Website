@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="John Malone and Kreekor Karageuzian">
 
-<title>MATH 244: Intermediate Data Science Project – M244 Project</title>
+<title>Statistical Analysis of the 2022-23 NBA MVP Race – M244 Project</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,41 +20,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -151,10 +117,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mvp-project" id="toc-mvp-project" class="nav-link active" data-scroll-target="#mvp-project">MVP Project</a></li>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
   <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a></li>
-  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
+  <ul class="collapse">
+  <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">Logistic Regression:</a></li>
+  <li><a href="#clustering" id="toc-clustering" class="nav-link" data-scroll-target="#clustering">Clustering:</a></li>
+  </ul></li>
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
   </ul>
 </nav>
@@ -164,13 +133,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">MATH 244: Intermediate Data Science Project</h1>
+<h1 class="title">Statistical Analysis of the 2022-23 NBA MVP Race</h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>John Malone and Kreekor Karageuzian </p>
+          </div>
+  </div>
     
   
     
@@ -181,35 +156,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="mvp-project" class="level3">
-<h3 class="anchored" data-anchor-id="mvp-project">MVP Project</h3>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Comparison Table for Custom Score vs Real Voting Results (without team success)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mvp_compare_table <span class="ot">&lt;-</span> mvp_compare <span class="sc">%&gt;%</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(name, team, mvp_score, mvp_points) <span class="sc">%&gt;%</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mvp_score))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>mvp_compare_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 13 × 4
-   name                    team  mvp_score mvp_points
-   &lt;chr&gt;                   &lt;chr&gt;     &lt;dbl&gt;      &lt;dbl&gt;
- 1 Nikola Jokic            Den       1.93         674
- 2 Joel Embiid             Phi       1.73         915
- 3 Giannis Antetokounmpo   Mil       1.47         606
- 4 Jayson Tatum            Bos       1.33         280
- 5 Domantas Sabonis        Sac       1.19          27
- 6 Jimmy Butler            Mia       1.18           3
- 7 Shai Gilgeous-Alexander Okc       1.02          46
- 8 Donovan Mitchell        Cle       0.986         30
- 9 Luka Doncic             Dal       0.970         10
-10 Ja Morant               Mem       0.828          0
-11 Stephen Curry           Gol       0.791          5
-12 De'Aaron Fox            Sac       0.672          2
-13 Jalen Brunson           Nyk       0.660          1</code></pre>
-</div>
-</div>
-</section>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>The NBA Most Valuable Player (MVP) Award is considered the league’s most prestigious individual honor. Winning the MVP award can change a player’s legacy, influence boosted contracts and endorsement deals, and generate meaningful fan discussions. Some notable MVP’s include LeBron James, Michael Jordan, and Steph Curry. Because the award represents both individual and team success, MVP debates have become one of the most discussed topics in all of professional sports.</p>
@@ -218,7 +164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="methodology" class="level2">
 <h2 class="anchored" data-anchor-id="methodology">Methodology</h2>
-<p>My data for this project came from two separate datasets that included statistics from NBA players in the 2022-2023 NBA season. One of the datasets was from NBA Stuffer, which included per-game player statistics. Our other dataset was from Kaggle, which included advanced efficiency statistics for each player. We combined the datasets by using cleaned player names after standardizing formatting inconsistencies. A few missing values for key variables were removed so that we could ensure our models and results were accurate.</p>
+<p>The data for this project came from two separate datasets that included statistics from NBA players in the 2022-2023 NBA season. One of the datasets was from NBA Stuffer, which included per-game player statistics. Our other dataset was from Kaggle, which included advanced efficiency statistics for each player. We combined the datasets by using cleaned player names after standardizing formatting inconsistencies. A few missing values for key variables were removed so that we could ensure our models and results were accurate.</p>
 <p>We also filtered the dataset to only include player who received MVP votes, to reduce noise and so that our results were focused on the relevant candidates for analysis. We created a new variable to import MVP votes per player to compare to our custom MVP model.</p>
 <p>We chose a select amount of variables to capture multiple dimensions of player performance for our custom MVP model. Regular box score statistics/traditional production statistics like points, rebounds, assists, steals, block, turnovers, and advanced metrics like True Shooting Percentage (TS %), Player Efficiency Rating (PER), Box Plus Minus (BPM). and Win Shares (WS) were included in to evaluate efficiency and overall impact. We also added team win percentage to take team success into account because winning is usually considered important in MVP voting.</p>
 <p>Some of the new variables we created included were: - Production score: average of standardized box score stats - Advanced score: average of standardized efficiency and advanced metrics - Custom MVP score: weight combination of production, advanced, and team success scores</p>
@@ -252,9 +198,61 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>The MVP score showed a positive relationship with the actual MVP voting results. Players with higher MVP scores generally received more MVP voting points, which means that our custom model lined up pretty well with the real voting outcomes. There were some differences in the model rankings and the actual voting results though. For example, the model ranked Jokic above Embiid, but Embiid was the actual player who won the MVP award for that season. This means that there are other factors beyond statistics that influence the final voting outcomes for MVP.</p>
+<section id="logistic-regression" class="level3">
+<h3 class="anchored" data-anchor-id="logistic-regression">Logistic Regression:</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = candidate_binary ~ mvp_score, family = "binomial", 
+    data = nba_logit)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)   -6.782      1.462  -4.639 3.49e-06 ***
+mvp_score      6.477      1.603   4.040 5.34e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 94.131  on 228  degrees of freedom
+Residual deviance: 34.680  on 227  degrees of freedom
+AIC: 38.68
+
+Number of Fisher Scoring iterations: 9</code></pre>
+</div>
+</div>
 <p>Our logistic regression model showed that our custom MVP score was a statistically significant predictor of MVP candidacy. The coefficient for our MVP score was positive (6.447) and highly significant (p-value = 5.34e-05). Our logistic regression model results mean that a 1-unit increase in MVP score multiplies the odds of a player being an MVP candidate by about e^647.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>          Truth
+Prediction   0   1
+         0 214   4
+         1   3   8</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric  .estimator .estimate
+  &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;
+1 accuracy binary         0.969</code></pre>
+</div>
+</div>
+</section>
+<section id="clustering" class="level3">
+<h3 class="anchored" data-anchor-id="clustering">Clustering:</h3>
 <p>To evaluate predictive performance, we created a confusion matrix to compare the predicted MVP candidates with the actual MVP candidates. Our model was able to classify 214 non-candidates and 8 MVP candidates correctly. Overall, our logistic regression model was able to accurately identify about 96.9% of NBA players, which suggests strong classification performance.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cluster-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 <p>Lastly, our clustering model supported the effectiveness of our custom MVP model further as our MVP caliber players were located in the higher performing cluster. Our top performing players, Joel Embiid and Nikola Jokic, appeared in the top right region of the production score vs advanced score visualization, which shows all around statistical impact across multiple categories.</p>
+</section>
 </section>
 <section id="discussion" class="level2">
 <h2 class="anchored" data-anchor-id="discussion">Discussion</h2>

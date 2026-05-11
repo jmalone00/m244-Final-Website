@@ -1,5 +1,6 @@
 ---
-title: "MATH 244: Intermediate Data Science Project"
+title: "Statistical Analysis of the 2022-23 NBA MVP Race"
+author: "John Malone and Kreekor Karageuzian"
 project:
   type: website
   output-dir: docs
@@ -8,7 +9,6 @@ execute:
   message: false
 ---
 
-### MVP Project
 
 ```{r libraries}
 #| echo: false
@@ -241,12 +241,12 @@ mvp_rankings <- mvp_results %>%
 ```
 
 ```{r mvp-compare-table}
+#| echo: false
+
 # Comparison Table for Custom Score vs Real Voting Results (without team success)
 mvp_compare_table <- mvp_compare %>%
   select(name, team, mvp_score, mvp_points) %>%
   arrange(desc(mvp_score))
-
-mvp_compare_table
 ```
 
 
@@ -261,7 +261,7 @@ The goal of our project is to develop a custom statistical MVP model and evaluat
 
 ## Methodology
 
-My data for this project came from two separate datasets that included statistics from NBA players in the 2022-2023 NBA season. One of the datasets was from NBA Stuffer, which included per-game player statistics. Our other dataset was from Kaggle, which included advanced efficiency statistics for each player. We combined the datasets by using cleaned player names after standardizing formatting inconsistencies. A few missing values for key variables were removed so that we could ensure our models and results were accurate. 
+The data for this project came from two separate datasets that included statistics from NBA players in the 2022-2023 NBA season. One of the datasets was from NBA Stuffer, which included per-game player statistics. Our other dataset was from Kaggle, which included advanced efficiency statistics for each player. We combined the datasets by using cleaned player names after standardizing formatting inconsistencies. A few missing values for key variables were removed so that we could ensure our models and results were accurate. 
 
 We also filtered the dataset to only include player who received MVP votes, to reduce noise and so that our results were focused on the relevant candidates for analysis. We created a new variable to import MVP votes per player to compare to our custom MVP model.
 
@@ -325,9 +325,116 @@ ggplot(mvp_compare_table, aes(x = mvp_score, y = mvp_points, label = name)) +
 
 The MVP score showed a positive relationship with the actual MVP voting results. Players with higher MVP scores generally received more MVP voting points, which means that our custom model lined up pretty well with the real voting outcomes. There were some differences in the model rankings and the actual voting results though. For example, the model ranked Jokic above Embiid, but Embiid was the actual player who won the MVP award for that season. This means that there are other factors beyond statistics that influence the final voting outcomes for MVP.
 
-Our logistic regression model showed that our custom MVP score was a statistically significant predictor of MVP candidacy. The coefficient for our MVP score was positive (6.447) and highly significant (p-value = 5.34e-05). Our logistic regression model results mean that a 1-unit increase in MVP score multiplies the odds of a player being an MVP candidate by about e^647. 
+### Logistic Regression:
+```{r mvp-Z}
+#| echo: false
+
+# Add row indicating mvp candidate
+
+library(dplyr)
+#Add row of MVP points, only the 12 players seen below received votes. Data is from Basketball Reference
+nba_z <- nba_z %>%
+  mutate(mvp_points = case_when(
+    name == "Joel Embiid"             ~ 915,
+    name == "Nikola Jokic"            ~ 674,
+    name == "Giannis Antetokounmpo"   ~ 606,
+    name == "Jayson Tatum"            ~ 280,
+    name == "Shai Gilgeous-Alexander" ~ 46,
+    name == "Donovan Mitchell"        ~ 30,
+    name == "Domantas Sabonis"        ~ 27,
+    name == "Luka Doncic"             ~ 10,
+    name == "Stephen Curry"           ~ 5,
+    name == "Jimmy Butler"            ~ 3,
+    name == "De'Aaron Fox"            ~ 2,
+    name == "Jalen Brunson"           ~ 1,
+    TRUE ~ 0  # Assigns 0 to everyone else
+  ))
+
+```
+
+```{r logit-Z}
+#| echo: false
+
+nba_z <- nba_z |> 
+  mutate(mvp_candidate = case_when(
+    mvp_points > 0 ~ "Y",
+    TRUE ~ "N"
+  ))
+
+nba_logit <- nba_z |>
+  mutate(mvp_score = 0.4 * production_score + 0.4 * advanced_score + 0.2 * team_success_score)
+
+```
+
+
+```{r}
+#| echo: false
+# Logistic regression model for mvp score
+nba_logit <- nba_logit |>
+  mutate(candidate_binary = ifelse(mvp_candidate == "Y", 1, 0))
+
+logit <- glm(candidate_binary ~ mvp_score, 
+                data = nba_logit,
+                family = "binomial")
+
+summary(logit)
+```
+
+Our logistic regression model showed that our custom MVP score was a statistically significant predictor of MVP candidacy. The coefficient for our MVP score was positive (6.447) and highly significant (p-value = 5.34e-05). Our logistic regression model results mean that a 1-unit increase in MVP score multiplies the odds of a player being an MVP candidate by about e^647.
+
+```{r confusion-matrix}
+#| echo: false
+
+library(broom)
+library(yardstick)
+
+# 1. Get predictions (probabilities)
+nba_results <- logit %>%
+  augment(type.predict = "response") %>%
+  mutate(pred_binary = factor(ifelse(.fitted > 0.4, 1, 0)),
+         candidate_binary = factor(candidate_binary))
+
+# 2. Generate the Confusion Matrix
+nba_results %>%
+  conf_mat(truth = candidate_binary, estimate = pred_binary)
+
+# 3. Calculate Accuracy
+nba_results %>%
+  accuracy(truth = candidate_binary, estimate = pred_binary)
+```
+
+### Clustering:
 
 To evaluate predictive performance, we created a confusion matrix to compare the predicted MVP candidates with the actual MVP candidates. Our model was able to classify 214 non-candidates and 8 MVP candidates correctly. Overall, our logistic regression model was able to accurately identify about 96.9% of NBA players, which suggests strong classification performance. 
+
+```{r set-up-cluster}
+#| echo: false
+
+set.seed(123)
+
+# K-means clustering with 2 clusters (high vs low performers)
+kmeans_result <- kmeans(nba_z$mvp_score, centers = 2)
+
+# Add cluster labels
+nba_z$cluster <- as.factor(kmeans_result$cluster)
+```
+
+```{r cluster}
+#| echo: false
+
+# Plot clusters to visualize how players group based on performance (each point represents a player)
+# Helps identify whether MVP-level player form a distinct group
+ggplot(nba_z, aes(x = production_score, y = advanced_score, color = cluster)) +
+  geom_point(size = 3) +
+  geom_text(aes(label = ifelse(name %in% mvp_players, name, "")),
+            size = 3, vjust = -1) +
+  labs(
+    title = "Clusters of Players (Production vs Advanced Score)",
+    x = "Production Score",
+    y = "Advanced Score"
+  ) +
+  theme_minimal()
+```
 
 Lastly, our clustering model supported the effectiveness of our custom MVP model further as our MVP caliber players were located in the higher performing cluster. Our top performing players, Joel Embiid and Nikola Jokic, appeared in the top right region of the production score vs advanced score visualization, which shows all around statistical impact across multiple categories. 
 
