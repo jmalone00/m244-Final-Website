@@ -1,4 +1,4 @@
-# Website Template
+# M244 Final Project Website
 
-Template repository for M244 Projects Hi John!
+By John and Kreekir
 
