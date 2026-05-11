@@ -3,9 +3,253 @@ title: "MATH 244: Intermediate Data Science Project"
 project:
   type: website
   output-dir: docs
+execute: 
+  warning: false
+  message: false
 ---
 
 ### MVP Project
+
+```{r libraries}
+#| echo: false
+
+library(tidyverse)
+library(janitor)
+library(stringi)
+library(tinytex)
+```
+
+```{r data-combine}
+#| echo: false
+
+# Read in player props dataset and clean column names
+# Create a cleaned player name column so names match across datasets
+props <- read_csv("nba_player_props.csv") |>
+  clean_names() |>
+  mutate(player_clean = stri_trans_general(name, "Latin-ASCII"))
+
+# Read in advanced stats datset and clean column names
+# Create same cleaned player name column for merging
+advanced <- read_csv("nba_2022-23_all_stats.csv") %>%
+  clean_names() %>%
+  mutate(player_clean = stri_trans_general(player_name, "Latin-ASCII")) %>%
+  mutate(
+    player_clean = str_trim(player_clean),
+    player_clean = case_when(
+      str_detect(player_clean, "Jokic") ~ "Nikola Jokic", 
+      str_detect(player_clean, "Doncic") ~ "Luka Doncic",
+      TRUE ~ player_clean
+    )
+  )
+
+# Keep only advanced variables needed for MVP model
+advanced_small <- advanced %>%
+  select(player_clean, per, ws, bpm)
+
+# Merge two datasets together using cleaned player name
+# Still want to add TEAM WIN PERCENTAGE variable into dataset
+nba_combined <- props %>%
+  left_join(advanced_small, by = "player_clean")
+```
+
+```{r add-win-percentage}
+#| echo: false
+
+# Add team win percentage
+team_wins <- tibble(
+  team = c("Den", "Phi", "Mil", "Bos", "Okc", "Cle", "Sac",
+           "Dal", "Gol", "Mia", "Nyk", "Mem"),
+  wins = c(53, 54, 58, 57, 40, 51, 48, 38, 44, 44, 47, 51),
+  losses = c(29, 28, 24, 25, 42, 31, 34, 44, 38, 38, 35, 31)
+) %>%
+  mutate(team_win_pct = wins / (wins + losses))
+```
+
+```{r mvp-votes}
+#| echo: false
+
+library(dplyr)
+#Add row of MVP points, only the 12 players seen below received votes. Data is from Basketball Reference
+nba_combine <- nba_combined %>%
+  mutate(mvp_points = case_when(
+    name == "Joel Embiid"             ~ 915,
+    name == "Nikola Jokic"            ~ 674,
+    name == "Giannis Antetokounmpo"   ~ 606,
+    name == "Jayson Tatum"            ~ 280,
+    name == "Shai Gilgeous-Alexander" ~ 46,
+    name == "Donovan Mitchell"        ~ 30,
+    name == "Domantas Sabonis"        ~ 27,
+    name == "Luka Doncic"             ~ 10,
+    name == "Stephen Curry"           ~ 5,
+    name == "Jimmy Butler"            ~ 3,
+    name == "De'Aaron Fox"            ~ 2,
+    name == "Jalen Brunson"           ~ 1,
+    TRUE ~ 0  # Assigns 0 to everyone else
+  ))
+
+```
+
+```{r data-clean}
+#| echo: false
+
+# Remove rows with missing values (ensure accurate standardization and model construction)
+nba_model_clean <- nba_combined %>%
+  left_join(team_wins, by = "team") %>%
+  drop_na(ppg, apg, rpg, bpg, spg, tpg, ts_percent, per, bpm, ws, team_win_pct)
+
+# Confirm no missing values left in cleaned dataset for variables in use for MVP model
+#colSums(is.na(nba_model_clean))
+```
+
+```{r z-model}
+#| echo: false
+
+# Standardize each variable using z-scores so all stats are on same scale 
+nba_z <- nba_model_clean %>%
+  mutate(
+    PPG_z = as.numeric(scale(ppg)),
+    APG_z = as.numeric(scale(apg)),
+    RPG_z = as.numeric(scale(rpg)),
+    BLK_z = as.numeric(scale(bpg)),
+    STL_z = as.numeric(scale(spg)),
+    TO_z = as.numeric(scale(tpg)) * (-1), # multiplied by -1 because having more turnovers are worse
+    TS_z = as.numeric(scale(ts_percent)),
+    PER_z = as.numeric(scale(per)),
+    BPM_z = as.numeric(scale(bpm)),
+    WS_z = as.numeric(scale(ws)),
+    TEAM_WIN_z = as.numeric(scale(team_win_pct))
+  )
+```
+
+```{r production-score}
+#| echo: false
+
+# Create Production Score (Box Score Stats)
+nba_z <- nba_z %>%
+  mutate(
+    production_score = (PPG_z + APG_z + RPG_z + STL_z + BLK_z + TO_z) / 6
+  )
+
+# Create Efficiency/Advanced Score
+nba_z <- nba_z %>%
+  mutate(
+    advanced_score = (TS_z + PER_z + BPM_z + WS_z) / 4
+  )
+
+nba_z <- nba_z %>%
+  mutate(
+    team_success_score = (TEAM_WIN_z)
+  )
+```
+
+```{r mvp-score}
+#| echo: false
+
+# MVP Score (Temporary - no team success yet)
+nba_z <- nba_z %>%
+  mutate(
+    mvp_score = 0.4 * production_score + 0.4 * advanced_score + 0.2 * team_success_score
+  )
+
+
+```
+
+```{r mvp-candidates}
+#| echo: false
+
+# Filter MVP Candidates
+mvp_players <- c(
+  "Joel Embiid",
+  "Nikola Jokic",
+  "Giannis Antetokounmpo",
+  "Jayson Tatum",
+  "Shai Gilgeous-Alexander",
+  "Donovan Mitchell",
+  "Domantas Sabonis",
+  "Luka Doncic",
+  "Stephen Curry",
+  "Jimmy Butler",
+  "De'Aaron Fox",
+  "Jalen Brunson",
+  "Ja Morant"
+)
+
+mvp_results <- nba_z %>%
+  filter(name %in% mvp_players)
+```
+
+```{r mvp-points}
+#| echo: false
+
+# Create a table of real MVP voting results for players who received votes
+mvp_votes <- tibble(
+  name = c(
+    "Joel Embiid",
+    "Nikola Jokic",
+    "Giannis Antetokounmpo",
+    "Jayson Tatum",
+    "Shai Gilgeous-Alexander",
+    "Donovan Mitchell",
+    "Domantas Sabonis",
+    "Luka Doncic",
+    "Stephen Curry",
+    "Jimmy Butler",
+    "De'Aaron Fox",
+    "Jalen Brunson",
+    "Ja Morant"
+  ),
+  mvp_points = c(915, 674, 606, 280, 46, 30, 27, 10, 5, 3, 2, 1, 0)
+)
+
+# Join real MVP voting points to the custom MVP model results
+mvp_compare <- mvp_results %>%
+  left_join(mvp_votes, by = "name")
+
+```
+
+
+```{r mvp-players}
+#| echo: false
+
+# Filter out to NBA players who received MVP Votes
+mvp_players <- c(
+  "Joel Embiid",
+  "Nikola Jokic",
+  "Giannis Antetokounmpo",
+  "Jayson Tatum",
+  "Shai Gilgeous-Alexander",
+  "Donovan Mitchell",
+  "Domantas Sabonis",
+  "Luka Doncic",
+  "Stephen Curry",
+  "Jimmy Butler",
+  "De'Aaron Fox",
+  "Jalen Brunson",
+  "Ja Morant"
+)
+
+```
+
+```{r rank-players}
+#| echo: false
+
+# Rank Players
+mvp_rankings <- mvp_results %>%
+  select(name, team, production_score, advanced_score, mvp_score) %>%
+  arrange(desc(mvp_score))
+
+```
+
+```{r mvp-compare-table}
+# Comparison Table for Custom Score vs Real Voting Results (without team success)
+mvp_compare_table <- mvp_compare %>%
+  select(name, team, mvp_score, mvp_points) %>%
+  arrange(desc(mvp_score))
+
+mvp_compare_table
+```
+
+
 
 ## Introduction
 
@@ -45,7 +289,39 @@ Two clusters were created which represented the higher and lower performing stat
 
 ## Results
 
+
+```{r mvp-scores-graph}
+#| echo: false
+
+# Visualizing Scores
+ggplot(mvp_rankings, aes(x = reorder(name, mvp_score), y = mvp_score)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Custom MVP Rankings",
+    x = "Player",
+    y = "MVP Score"
+  ) + 
+  theme_minimal()
+
+# This plot ranks players based on our custom MVP score, which combines both production and advanced metrics (no team success pillar added yet). It shows that players like Jokic and Embiid stand out as top candidates due to strong overall performance.
+```
+
 The custom MVP model ranked Nikola Jokic as the top performer during the 2022-2023 NBA season, and the following candidates were Joel Embiid and Giannis Antetokonmpo. Players like Jokic and Embiid consistently scored highly across all the pillars of performance in our custom model, especially in the advanced efficiency metrics. 
+
+```{r mvp-points-vs-score}
+#| echo: false
+ggplot(mvp_compare_table, aes(x = mvp_score, y = mvp_points, label = name)) +
+  geom_point(size = 3) +
+  geom_text(nudge_y = 50, size = 3) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  labs(
+    title = "MVP Score vs MVP Voting Points",
+    x = "MVP Score",
+    y = "MVP Points"
+  ) +
+  theme_minimal()
+```
 
 The MVP score showed a positive relationship with the actual MVP voting results. Players with higher MVP scores generally received more MVP voting points, which means that our custom model lined up pretty well with the real voting outcomes. There were some differences in the model rankings and the actual voting results though. For example, the model ranked Jokic above Embiid, but Embiid was the actual player who won the MVP award for that season. This means that there are other factors beyond statistics that influence the final voting outcomes for MVP.
 

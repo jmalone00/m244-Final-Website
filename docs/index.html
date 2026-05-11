@@ -2,16 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>MATH 244: Intermediate Data Science Project – M244 Project</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -22,6 +19,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -35,14 +67,15 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-e31584831b205ffbb2d98406f31c2a5b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -82,6 +115,8 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">M244 Project</span>
     </a>
@@ -148,6 +183,32 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="mvp-project" class="level3">
 <h3 class="anchored" data-anchor-id="mvp-project">MVP Project</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Comparison Table for Custom Score vs Real Voting Results (without team success)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mvp_compare_table <span class="ot">&lt;-</span> mvp_compare <span class="sc">%&gt;%</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(name, team, mvp_score, mvp_points) <span class="sc">%&gt;%</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mvp_score))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>mvp_compare_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 13 × 4
+   name                    team  mvp_score mvp_points
+   &lt;chr&gt;                   &lt;chr&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+ 1 Nikola Jokic            Den       1.93         674
+ 2 Joel Embiid             Phi       1.73         915
+ 3 Giannis Antetokounmpo   Mil       1.47         606
+ 4 Jayson Tatum            Bos       1.33         280
+ 5 Domantas Sabonis        Sac       1.19          27
+ 6 Jimmy Butler            Mia       1.18           3
+ 7 Shai Gilgeous-Alexander Okc       1.02          46
+ 8 Donovan Mitchell        Cle       0.986         30
+ 9 Luka Doncic             Dal       0.970         10
+10 Ja Morant               Mem       0.828          0
+11 Stephen Curry           Gol       0.791          5
+12 De'Aaron Fox            Sac       0.672          2
+13 Jalen Brunson           Nyk       0.660          1</code></pre>
+</div>
+</div>
 </section>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
@@ -171,16 +232,37 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="results" class="level2">
 <h2 class="anchored" data-anchor-id="results">Results</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/mvp-scores-graph-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 <p>The custom MVP model ranked Nikola Jokic as the top performer during the 2022-2023 NBA season, and the following candidates were Joel Embiid and Giannis Antetokonmpo. Players like Jokic and Embiid consistently scored highly across all the pillars of performance in our custom model, especially in the advanced efficiency metrics.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/mvp-points-vs-score-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 <p>The MVP score showed a positive relationship with the actual MVP voting results. Players with higher MVP scores generally received more MVP voting points, which means that our custom model lined up pretty well with the real voting outcomes. There were some differences in the model rankings and the actual voting results though. For example, the model ranked Jokic above Embiid, but Embiid was the actual player who won the MVP award for that season. This means that there are other factors beyond statistics that influence the final voting outcomes for MVP.</p>
 <p>Our logistic regression model showed that our custom MVP score was a statistically significant predictor of MVP candidacy. The coefficient for our MVP score was positive (6.447) and highly significant (p-value = 5.34e-05). Our logistic regression model results mean that a 1-unit increase in MVP score multiplies the odds of a player being an MVP candidate by about e^647.</p>
 <p>To evaluate predictive performance, we created a confusion matrix to compare the predicted MVP candidates with the actual MVP candidates. Our model was able to classify 214 non-candidates and 8 MVP candidates correctly. Overall, our logistic regression model was able to accurately identify about 96.9% of NBA players, which suggests strong classification performance.</p>
 <p>Lastly, our clustering model supported the effectiveness of our custom MVP model further as our MVP caliber players were located in the higher performing cluster. Our top performing players, Joel Embiid and Nikola Jokic, appeared in the top right region of the production score vs advanced score visualization, which shows all around statistical impact across multiple categories.</p>
-<p>Show graphs and the other analyses we did</p>
 </section>
 <section id="discussion" class="level2">
 <h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
-<p>Talk about our takeaways from the project</p>
+<p>The results of our project suggests that our custom MVP model was successful for the most part in identifying MVP caliber players and explaining many different aspects of the voting. The MVP score showed a strong positive relationship with actual MVP voting points. Our logistic regression model also showed that higher MVP scores increased the probability of being classified as an MVP candidate. On top of this, our clustering model showed that many of the MVP candidates were naturally grouped together based on their production and efficiency metrics/scores.</p>
+<p>One of the most important findings in our analysis was the difference in our model rankings versus the actual MVP results. Joel Embiid won the 2022-2023 NBA MVP award, but our custom MVP model showed that Nikola Jokic was our top performer. The difference between these two results highlights the subjectivity and complexity of MVP voting. Jokic excelled in his performance across the advanced metrics such as PER, BPM, and WS which strongly influenced our model. On the other hand, MVP voting likely takes into account additional factors beyond just statistics, like narrative, voter fatigue, media perception, and team story lines.</p>
+<p>Our model was also able to show us how different definitions of “value” can influence MVP evaluations. For example, traditional box score production favors players with high scoring. On the other hand, advanced metrics rewards players who are more efficient and provide more of an overall impact to their team. We attempted to combine these categories into a single MVP score in hopes of balancing these competing perspectives.</p>
+<p>There are several limitations we wanted to make sure were known. First, the model weights we chose were subjective rather than optimized in a statistical manner. Second, we only covered defensive impact partially through basic metrics and BPM. Third, our team success variable was very simplified as we only used the team’s win percentages throughout the regular season and didn’t take into account strength of schedule or playoff expectations. Lastly, our analysis only examined a single NBA season, which limited our ability to generalize results across different eras and seasons.</p>
+<p>Some future improvements we could include are including more advanced defensive metrics, analyzing multiple NBA seasons, or applying some machine learning methods to improve prediction accuracy. Other variables like injuries, roster strength, or voter trends could also help explain differences between statistical models and real world MVP voting outcomes.</p>
 
 
 </section>
