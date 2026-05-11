@@ -55,10 +55,16 @@ To evaluate predictive performance, we created a confusion matrix to compare the
 
 Lastly, our clustering model supported the effectiveness of our custom MVP model further as our MVP caliber players were located in the higher performing cluster. Our top performing players, Joel Embiid and Nikola Jokic, appeared in the top right region of the production score vs advanced score visualization, which shows all around statistical impact across multiple categories. 
 
-Show graphs and the other analyses we did
-
 ## Discussion
 
-Talk about our takeaways from the project
+The results of our project suggests that our custom MVP model was successful for the most part in identifying MVP caliber players and explaining many different aspects of the voting. The MVP score showed a strong positive relationship with actual MVP voting points. Our logistic regression model also showed that higher MVP scores increased the probability of being classified as an MVP candidate. On top of this, our clustering model showed that many of the MVP candidates were naturally grouped together based on their production and efficiency metrics/scores. 
+
+One of the most important findings in our analysis was the difference in our model rankings versus the actual MVP results. Joel Embiid won the 2022-2023 NBA MVP award, but our custom MVP model showed that Nikola Jokic was our top performer. The difference between these two results highlights the subjectivity and complexity of MVP voting. Jokic excelled in his performance across the advanced metrics such as PER, BPM, and WS which strongly influenced our model. On the other hand, MVP voting likely takes into account additional factors beyond just statistics, like narrative, voter fatigue, media perception, and team story lines.
+
+Our model was also able to show us how different definitions of "value" can influence MVP evaluations. For example, traditional box score production favors players with high scoring. On the other hand, advanced metrics rewards players who are more efficient and provide more of an overall impact to their team. We attempted to combine these categories into a single MVP score in hopes of balancing these competing perspectives. 
+
+There are several limitations we wanted to make sure were known. First, the model weights we chose were subjective rather than optimized in a statistical manner. Second, we only covered defensive impact partially through basic metrics and BPM. Third, our team success variable was very simplified as we only used the team's win percentages throughout the regular season and didn't take into account strength of schedule or playoff expectations. Lastly, our analysis only examined a single NBA season, which limited our ability to generalize results across different eras and seasons. 
+
+Some future improvements we could include are including more advanced defensive metrics, analyzing multiple NBA seasons, or applying some machine learning methods to improve prediction accuracy. Other variables like injuries, roster strength, or voter trends could also help explain differences between statistical models and real world MVP voting outcomes. 
 
 
