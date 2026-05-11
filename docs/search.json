@@ -12,5 +12,33 @@
     "title": "Notes",
     "section": "",
     "text": "Example of adding another page to a website."
+  },
+  {
+    "objectID": "index.html#introduction",
+    "href": "index.html#introduction",
+    "title": "MATH 244: Intermediate Data Science Project",
+    "section": "Introduction",
+    "text": "Introduction\nExplain the project and variables"
+  },
+  {
+    "objectID": "index.html#methodology",
+    "href": "index.html#methodology",
+    "title": "MATH 244: Intermediate Data Science Project",
+    "section": "Methodology",
+    "text": "Methodology\nExplain what we did"
+  },
+  {
+    "objectID": "index.html#results",
+    "href": "index.html#results",
+    "title": "MATH 244: Intermediate Data Science Project",
+    "section": "Results",
+    "text": "Results\nShow graphs and the other analyses we did"
+  },
+  {
+    "objectID": "index.html#discussion",
+    "href": "index.html#discussion",
+    "title": "MATH 244: Intermediate Data Science Project",
+    "section": "Discussion",
+    "text": "Discussion\nTalk about our takeaways from the project"
   }
 ]
