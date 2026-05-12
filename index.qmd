@@ -270,16 +270,19 @@ The data for this project came from two separate datasets that included statisti
 
 We also filtered the dataset to only include player who received MVP votes, to reduce noise and so that our results were focused on the relevant candidates for analysis. We created a new variable to import MVP votes per player to compare to our custom MVP model.
 
-We chose a select amount of variables to capture multiple dimensions of player performance for our custom MVP model. Regular box score statistics/traditional production statistics like points, rebounds, assists, steals, block, turnovers, and advanced metrics like True Shooting Percentage (TS %), Player Efficiency Rating (PER), Box Plus Minus (BPM). and Win Shares (WS) were included in to evaluate efficiency and overall impact. We also added team win percentage to take team success into account because winning is usually considered important in MVP voting. 
+We chose a select amount of variables to capture multiple dimensions of player performance for our custom MVP model. Regular box score statistics/traditional production statistics like points, rebounds, assists, steals, block, turnovers. Additionally, advanced metrics like True Shooting Percentage (TS %), Player Efficiency Rating (PER), Box Plus Minus (BPM), and Win Shares (WS) were also included in order to evaluate efficiency and overall impact. We also added team win percentage to take team success into account because winning is usually considered important in MVP voting. 
 
 Some of the new variables we created included were:
+
 - Production score: average of standardized box score stats
+
 - Advanced score: average of standardized efficiency and advanced metrics
+
 - Custom MVP score: weight combination of production, advanced, and team success scores
 
 Because some variables like points per game and win shares are measured on different scales, we decided to standardize our variables using z-scores before constructing our MVP model. Standardizing our chosen variables made sure that no single variable would dominate our custom model because of its scale and allows us to combine multiple stats into one MVP score. The final MVP score was constructed as a weighted combination of the three categories, with production and advanced statistics each taking up 40% of the score and team success taking contributing to the last 20%. We chose these weights to balance statistical production with efficiency based metrics while also taking into account team performance. We also changed the weights between the 3 pillars of our equation to see if results would change drastically or not but saw that the strongest MVP candidate orders remained generally the same. 
 
-MVP Score: 0.4 (Production Score) + 0.4 (Advanced Score) + 0.2 (Team Success)
+MVP Score = 0.4 (Production Score) + 0.4 (Advanced Score) + 0.2 (Team Success)
 
 To see if our custom MVP model could statistically predict MVP caliber players, we decided to fit a logistic regression model using MVP candidacy as the response variable. We grouped player by classifying players who received MVP votes as MVP candidates, while the rest of the players were classified as non-candidates. Using a logistic regression was an appropriate as the response variables was binary. 
 
@@ -408,9 +411,11 @@ nba_results %>%
   accuracy(truth = candidate_binary, estimate = pred_binary)
 ```
 
-### Clustering:
 
-To evaluate predictive performance, we created a confusion matrix to compare the predicted MVP candidates with the actual MVP candidates. Our model was able to classify 214 non-candidates and 8 MVP candidates correctly. Overall, our logistic regression model was able to accurately identify about 96.9% of NBA players, which suggests strong classification performance. 
+
+To evaluate predictive performance, we created a confusion matrix to compare the predicted MVP candidates with the actual MVP candidates. Our model was able to classify 214 non-candidates and 8 MVP candidates correctly. Overall, our logistic regression model was able to accurately identify about 96.9% of NBA players, which suggests strong classification performance.
+
+### Clustering:
 
 ```{r set-up-cluster}
 #| echo: false
