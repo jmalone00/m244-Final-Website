@@ -25,13 +25,13 @@ library(tinytex)
 
 # Read in player props dataset and clean column names
 # Create a cleaned player name column so names match across datasets
-props <- read_csv("data/nba_player_props.csv") |>
+props <- read_csv("nba_player_props.csv") |>
   clean_names() |>
   mutate(player_clean = stri_trans_general(name, "Latin-ASCII"))
 
 # Read in advanced stats datset and clean column names
 # Create same cleaned player name column for merging
-advanced <- read_csv("data/nba_2022-23_all_stats.csv") %>%
+advanced <- read_csv("nba_2022-23_all_stats.csv") %>%
   clean_names() %>%
   mutate(player_clean = stri_trans_general(player_name, "Latin-ASCII")) %>%
   mutate(
