@@ -255,6 +255,10 @@ mvp_compare_table <- mvp_compare %>%
 
 The NBA Most Valuable Player (MVP) Award is considered the league's most prestigious individual honor. Winning the MVP award can change a player's legacy, influence boosted contracts and endorsement deals, and generate meaningful fan discussions. Some notable MVP's include LeBron James, Michael Jordan, and Steph Curry. Because the award represents both individual and team success, MVP debates have become one of the most discussed topics in all of professional sports. 
 
+![](jordan_mvp.jpeg){fig-align="center" width="603"}
+
+[Image from\ The Sporting News](https://www.sportingnews.com/in/chicago-bulls/news/this-date-in-nba-history-may-18-michael-jordan-is-named-nba-mvp-in-1998-and-more/1rdjlayfa1mvs13q04ij8dt2ta)
+
 There is no strict formula for determining the NBA MVP Award, as it is voted on by media members which makes the process very subjective. Different voters may prioritize different aspects of performance like scoring, efficiency, team success, or other narrative factors. During the 2022-2023 season, debates surrounding Nikola Jokic, Joel Embiid, and Giannis Antetokounmpo highlighted disagreements regarding which statistics and achievements should matter most in determining the MVP. Jokic domintated advanced statistics, so he had a strong analytical case. Embiid led the league in scoring so he was backed up by the traditional scoring argument. Lastly, Giannis led his team to the best record in the league. 
 
 The goal of our project is to develop a custom statistical MVP model and evaluate how well it explains the actual MVP voting outcomes during the 2022-2023 NBA season. By combining traditional box score statistics, advanced efficiency statistics, and team success metrics into a single MVP score, we try to investigate whether player performance alone can explain MVP voting patterns. More specifically, our analysis explores which players rank highest in the model, whether MVP score predicts MVP candidacy, and how closely our model aligns with the real voting results. 
