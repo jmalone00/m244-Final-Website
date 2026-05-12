@@ -4,7 +4,8 @@ author: "John Malone and Kreekor Karageuzian"
 project:
   type: website
   output-dir: docs
-execute: 
+execute:
+  echo: false
   warning: false
   message: false
 ---
