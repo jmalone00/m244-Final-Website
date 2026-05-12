@@ -1,4 +1,4 @@
-# M244 Final Project Website
+# Statistical Analysis of the 2022-23 NBA MVP Race
 
 By John and Kreekor
 
