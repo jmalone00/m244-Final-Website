@@ -1,5 +1,6 @@
 # Statistical Analysis of the 2022-23 NBA MVP Race
 Authors: John Malone and Kreekor Karageuzian
+
 Course: MATH 244
 
 ### Project Overview
